@@ -25,10 +25,10 @@ app.get("/health", (req, res) => {
   });
 });
 
+// Expense routes
 const expenseRoutes = require("./routes/expenseRoutes");
 
 app.use("/expenses", expenseRoutes);
-
 
 // 404 handler
 app.use((req, res, next) => {
