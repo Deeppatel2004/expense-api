@@ -10,6 +10,10 @@ const app = express();
 // Middleware
 app.use(express.json());
 
+
+const authRoutes = require('./routes/auth');
+app.use('/auth', authRoutes);
+
 // Logger middleware
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);

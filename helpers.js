@@ -119,6 +119,28 @@ function monthlyTotals(expenses) {
   return totals;
 }
 
+
+function monthTotal(expenses, month) {
+  let total = 0;
+
+  for (const expense of expenses) {
+    const date = new Date(expense.date);
+
+    if (Number.isNaN(date.getTime())) {
+      continue;
+    }
+
+    const expenseMonth = date.toISOString().slice(0, 7);
+
+    if (expenseMonth === month) {
+      total += Number(expense.amount);
+    }
+  }
+
+  return Number(total.toFixed(2));
+}
+
+
 // 6. Check MongoDB ObjectId
 // Reused from todo-api
 function isValidId(id) {
@@ -190,6 +212,7 @@ module.exports = {
   expenseFilter,
   totalsByCategory,
   monthlyTotals,
+  monthTotal,
   isValidId,
   cleanPatch,
   errorBody,

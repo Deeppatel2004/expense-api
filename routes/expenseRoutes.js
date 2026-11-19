@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 
 const Expense = require("../models/Expense");
+const requireAuth = require("../middleware/requireAuth");
 
 const {
   validateExpense,
@@ -12,11 +13,12 @@ const {
   cleanPatch,
   errorBody,
   statusForDbError,
+  monthTotal,
+  totalsByCategory,
 } = require("../helpers");
 
-// Temporary fake user ID.
-// Authentication will be added tomorrow.
-const fakeUserId = "507f1f77bcf86cd799439011";
+// Protect all expense routes
+router.use(requireAuth);
 
 // POST /expenses - Create expense
 router.post("/", async (req, res) => {
@@ -24,15 +26,12 @@ router.post("/", async (req, res) => {
     const validationError = validateExpense(req.body);
 
     if (validationError) {
-      return res.status(400).json(
-        errorBody(400, validationError)
-      );
+      return res.status(400).json(errorBody(400, validationError));
     }
 
     const expense = await Expense.create({
       ...req.body,
-      amount: Number(req.body.amount),
-      owner: fakeUserId,
+      owner: req.user.id,
     });
 
     return res.status(201).json({
@@ -41,12 +40,8 @@ router.post("/", async (req, res) => {
     });
   } catch (err) {
     const status = statusForDbError(err);
-
     return res.status(status).json(
-      errorBody(
-        status,
-        status === 500 ? "Internal server error" : err.message
-      )
+      errorBody(status, status === 500 ? "Internal server error" : err.message)
     );
   }
 });
@@ -54,11 +49,8 @@ router.post("/", async (req, res) => {
 // GET /expenses - Get all expenses
 router.get("/", async (req, res) => {
   try {
-    const filter = expenseFilter(fakeUserId, req.query);
-
-    const expenses = await Expense.find(filter).sort({
-      date: -1,
-    });
+    const filter = expenseFilter(req.user.id, req.query);
+    const expenses = await Expense.find(filter);
 
     return res.status(200).json({
       success: true,
@@ -67,9 +59,54 @@ router.get("/", async (req, res) => {
     });
   } catch (err) {
     const status = statusForDbError(err);
-
     return res.status(status).json(
       errorBody(status, "Unable to fetch expenses")
+    );
+  }
+});
+
+// GET /expenses/summary?month=2026-11
+// Keep this BEFORE /:id
+router.get("/summary", async (req, res) => {
+  try {
+    const { month } = req.query;
+
+    if (
+      typeof month !== "string" ||
+      !/^\d{4}-(0[1-9]|1[0-2])$/.test(month)
+    ) {
+      return res.status(400).json(
+        errorBody(400, "Invalid month format. Use YYYY-MM")
+      );
+    }
+
+    // Convert YYYY-MM into a date range
+    const [year, monthNumber] = month.split("-").map(Number);
+
+    const startDate = new Date(Date.UTC(year, monthNumber - 1, 1));
+    const endDate = new Date(Date.UTC(year, monthNumber, 1));
+
+    // Fetch only this user's expenses in this month
+    const expenses = await Expense.find({
+      owner: req.user.id,
+      date: {
+        $gte: startDate,
+        $lt: endDate,
+      },
+    });
+
+    const total = monthTotal(expenses, month);
+    const byCategory = totalsByCategory(expenses);
+
+    return res.status(200).json({
+      month,
+      total,
+      byCategory,
+    });
+  } catch (err) {
+    const status = statusForDbError(err);
+    return res.status(status).json(
+      errorBody(status, "Unable to fetch summary")
     );
   }
 });
@@ -80,20 +117,16 @@ router.get("/:id", async (req, res) => {
     const { id } = req.params;
 
     if (!isValidId(id)) {
-      return res.status(404).json(
-        errorBody(404, "Expense not found")
-      );
+      return res.status(404).json(errorBody(404, "Expense not found"));
     }
 
     const expense = await Expense.findOne({
       _id: id,
-      owner: fakeUserId,
+      owner: req.user.id,
     });
 
     if (!expense) {
-      return res.status(404).json(
-        errorBody(404, "Expense not found")
-      );
+      return res.status(404).json(errorBody(404, "Expense not found"));
     }
 
     return res.status(200).json({
@@ -102,7 +135,6 @@ router.get("/:id", async (req, res) => {
     });
   } catch (err) {
     const status = statusForDbError(err);
-
     return res.status(status).json(
       errorBody(status, "Unable to fetch expense")
     );
@@ -115,9 +147,7 @@ router.patch("/:id", async (req, res) => {
     const { id } = req.params;
 
     if (!isValidId(id)) {
-      return res.status(404).json(
-        errorBody(404, "Expense not found")
-      );
+      return res.status(404).json(errorBody(404, "Expense not found"));
     }
 
     const changes = cleanPatch(req.body);
@@ -128,21 +158,17 @@ router.patch("/:id", async (req, res) => {
       );
     }
 
-    const validationError = validateExpense(changes);
-
-    // PATCH may omit required fields that are already in the database.
-    // Validate the merged existing + updated data instead.
+    // Find only this user's expense
     const existing = await Expense.findOne({
       _id: id,
-      owner: fakeUserId,
+      owner: req.user.id,
     });
 
     if (!existing) {
-      return res.status(404).json(
-        errorBody(404, "Expense not found")
-      );
+      return res.status(404).json(errorBody(404, "Expense not found"));
     }
 
+    // Validate the merged existing + updated data
     const mergedData = {
       title: changes.title ?? existing.title,
       amount: changes.amount ?? existing.amount,
@@ -151,26 +177,24 @@ router.patch("/:id", async (req, res) => {
       notes: changes.notes ?? existing.notes,
     };
 
-    const finalValidationError = validateExpense(mergedData);
+    const validationError = validateExpense(mergedData);
 
-    if (finalValidationError) {
-      return res.status(400).json(
-        errorBody(400, finalValidationError)
-      );
+    if (validationError) {
+      return res.status(400).json(errorBody(400, validationError));
+    }
+
+    // Ensure amount is stored as a number
+    if (changes.amount !== undefined) {
+      changes.amount = Number(changes.amount);
     }
 
     const updatedExpense = await Expense.findOneAndUpdate(
       {
         _id: id,
-        owner: fakeUserId,
+        owner: req.user.id,
       },
       {
-        $set: {
-          ...changes,
-          ...(changes.amount !== undefined
-            ? { amount: Number(changes.amount) }
-            : {}),
-        },
+        $set: changes,
       },
       {
         returnDocument: "after",
@@ -178,18 +202,18 @@ router.patch("/:id", async (req, res) => {
       }
     );
 
+    if (!updatedExpense) {
+      return res.status(404).json(errorBody(404, "Expense not found"));
+    }
+
     return res.status(200).json({
       success: true,
       expense: toPublicExpense(updatedExpense),
     });
   } catch (err) {
     const status = statusForDbError(err);
-
     return res.status(status).json(
-      errorBody(
-        status,
-        status === 500 ? "Internal server error" : err.message
-      )
+      errorBody(status, status === 500 ? "Internal server error" : err.message)
     );
   }
 });
@@ -200,26 +224,21 @@ router.delete("/:id", async (req, res) => {
     const { id } = req.params;
 
     if (!isValidId(id)) {
-      return res.status(404).json(
-        errorBody(404, "Expense not found")
-      );
+      return res.status(404).json(errorBody(404, "Expense not found"));
     }
 
     const deletedExpense = await Expense.findOneAndDelete({
       _id: id,
-      owner: fakeUserId,
+      owner: req.user.id,
     });
 
     if (!deletedExpense) {
-      return res.status(404).json(
-        errorBody(404, "Expense not found")
-      );
+      return res.status(404).json(errorBody(404, "Expense not found"));
     }
 
     return res.status(204).send();
   } catch (err) {
     const status = statusForDbError(err);
-
     return res.status(status).json(
       errorBody(status, "Unable to delete expense")
     );
