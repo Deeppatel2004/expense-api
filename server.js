@@ -72,8 +72,10 @@ if (require.main === module) {
     process.exit(1);
   }
 
-  mongoose
-    .connect(process.env.MONGODB_URI)
+mongoose
+  .connect(process.env.MONGODB_URI, {
+    serverSelectionTimeoutMS: 10000,
+  })
     .then(() => {
       console.log("MongoDB connected");
 
