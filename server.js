@@ -10,9 +10,9 @@ const app = express();
 // Middleware
 app.use(express.json());
 
-
-const authRoutes = require('./routes/auth');
-app.use('/auth', authRoutes);
+// Auth routes
+const authRoutes = require("./routes/auth");
+app.use("/auth", authRoutes);
 
 // Logger middleware
 app.use((req, res, next) => {
@@ -31,7 +31,6 @@ app.get("/health", (req, res) => {
 
 // Expense routes
 const expenseRoutes = require("./routes/expenseRoutes");
-
 app.use("/expenses", expenseRoutes);
 
 // 404 handler
@@ -53,6 +52,26 @@ app.use((err, req, res, next) => {
 
 // Start server only when executed directly
 if (require.main === module) {
+  console.log(
+    "MONGODB_URI exists:",
+    Boolean(process.env.MONGODB_URI)
+  );
+
+  console.log(
+    "JWT_SECRET exists:",
+    Boolean(process.env.JWT_SECRET)
+  );
+
+  if (!process.env.MONGODB_URI) {
+    console.error("ERROR: MONGODB_URI is missing");
+    process.exit(1);
+  }
+
+  if (!process.env.JWT_SECRET) {
+    console.error("ERROR: JWT_SECRET is missing");
+    process.exit(1);
+  }
+
   mongoose
     .connect(process.env.MONGODB_URI)
     .then(() => {
@@ -65,7 +84,7 @@ if (require.main === module) {
       });
     })
     .catch((error) => {
-      console.error("MongoDB connection failed:", error.message);
+      console.error("MongoDB connection failed:", error);
       process.exit(1);
     });
 }
