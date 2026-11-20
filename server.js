@@ -9,9 +9,18 @@ dotenv.config();
 const app = express();
 
 // CORS - allow React frontend
-app.use(cors({
-  origin: "http://localhost:5174"
-}));
+const cors = require("cors");
+
+const allowedOrigins = [
+  "http://localhost:5174",
+  "https://expense-react-delta.vercel.app",
+];
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+  })
+);
 
 // Middleware
 app.use(express.json());
