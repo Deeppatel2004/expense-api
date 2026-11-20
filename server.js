@@ -2,16 +2,22 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const cors = require("cors");
 
 dotenv.config();
 
 const app = express();
 
+// CORS - allow React frontend
+app.use(cors({
+  origin: "http://localhost:5174"
+}));
+
 // Middleware
 app.use(express.json());
 
 // Auth routes
-const authRoutes = require("./routes/auth");
+const authRoutes = require("./routes/authRoutes");
 app.use("/auth", authRoutes);
 
 // Logger middleware
