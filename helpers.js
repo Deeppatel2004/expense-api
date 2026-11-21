@@ -55,29 +55,55 @@ function toPublicExpense(expense) {
   };
 }
 
-// 3. Filter expenses by owner, category and month
+
+// 3. Filter expenses by owner, search, category, month and date range
 function expenseFilter(userId, query = {}) {
   const filter = {
     owner: userId,
   };
 
+  // Search by expense title (case-insensitive)
+  if (query.search && query.search.trim()) {
+    filter.title = {
+      $regex: query.search.trim(),
+      $options: "i",
+    };
+  }
+
+  // Filter by category
   if (query.category) {
     filter.category = query.category;
   }
 
-  if (query.month && /^\d{4}-\d{2}$/.test(query.month)) {
+  // Filter by month
+  if (query.month && /^\d{4}-(0[1-9]|1[0-2])$/.test(query.month)) {
     const [year, month] = query.month.split("-").map(Number);
 
-    if (month >= 1 && month <= 12) {
-      filter.date = {
-        $gte: new Date(Date.UTC(year, month - 1, 1)),
-        $lt: new Date(Date.UTC(year, month, 1)),
-      };
+    filter.date = {
+      $gte: new Date(Date.UTC(year, month - 1, 1)),
+      $lt: new Date(Date.UTC(year, month, 1)),
+    };
+  }
+
+  // Filter by start and end date
+  else if (query.startDate || query.endDate) {
+    filter.date = {};
+
+    if (query.startDate) {
+      filter.date.$gte = new Date(query.startDate);
+    }
+
+    if (query.endDate) {
+      const endDate = new Date(query.endDate);
+      endDate.setUTCDate(endDate.getUTCDate() + 1);
+
+      filter.date.$lt = endDate;
     }
   }
 
   return filter;
 }
+
 
 // 4. Calculate totals by category
 function totalsByCategory(expenses) {
