@@ -2,11 +2,13 @@
 
 ## 1. Project Description
 
-Expense Tracker is a web application that helps users record, manage, search, and track their daily expenses, view monthly spending totals, and organize expenses by category.
+Expense Tracker is a full-stack web application that helps users record, manage, search, filter, and track their daily expenses.
+
+Users can register, log in, manage their personal expenses, and view monthly spending summaries with category-wise breakdowns.
 
 ## 2. Database Design
 
-We will use MongoDB with two collections: User and Expense.
+We use MongoDB with two collections: User and Expense.
 
 ### User Model
 
@@ -41,7 +43,7 @@ Rules:
 - Amount must be a valid positive number.
 - Title must not be empty.
 - Category must match an allowed category.
-- Owner must reference an existing user.
+- Owner must reference the expense's user.
 - Use Mongoose timestamps.
 
 ### Expense Categories
@@ -67,43 +69,37 @@ One user can have many expenses, but each expense belongs to only one user.
 |---|---|---|---|
 | POST | /auth/register | Register a new user | No |
 | POST | /auth/login | Login and receive JWT | No |
-| GET | /auth/me | Get logged-in user details | Yes |
 
-Logout will be handled on the frontend by clearing the stored authentication token.
+Logout is handled on the frontend by clearing the stored authentication token.
 
 ### Expense Routes
 
 | Method | Path | Purpose | Authentication |
 |---|---|---|---|
 | POST | /expenses | Create an expense | Yes |
-| GET | /expenses | Get all expenses | Yes |
+| GET | /expenses | Get expenses | Yes |
 | GET | /expenses/:id | Get one expense | Yes |
 | PATCH | /expenses/:id | Update an expense | Yes |
 | DELETE | /expenses/:id | Delete an expense | Yes |
-| GET | /expenses/summary/monthly | Get monthly totals for the last six months | Yes |
+| GET | /expenses/summary?month=YYYY-MM | Get monthly summary | Yes |
 
-### Search and Filter
+### Search and Filtering
 
-Search and filtering will use query parameters.
+- Search expenses by title.
+- Search expenses by notes.
+- Filter expenses by category.
+- Filter expenses by month.
+- Sort expenses.
+- Combine supported filters.
 
-Examples:
-
-- GET /expenses?search=lunch
-- GET /expenses?category=Food
-- GET /expenses?category=Transport
-- GET /expenses?from=2026-11-01&to=2026-11-30
-- GET /expenses?search=bus&category=Transport
-
-Features:
-- Search by expense title.
-- Filter by category.
-- Filter by date range.
-- Combine multiple filters.
+Search currently runs in the browser using the loaded expense list.
 
 ### Security
 
 - Protect private routes using requireAuth.
-- Use ownerFilter to retrieve only the logged-in user's expenses.
+- Use JWT authentication.
+- Store passwords securely using bcrypt.
+- Retrieve only the logged-in user's expenses.
 - Include owner ID when updating or deleting expenses.
 - Users must not access another user's expenses.
 
@@ -113,28 +109,31 @@ Features:
 |---|---|---|
 | /register | Register | Create a new account |
 | /login | Login | Login to an account |
-| /dashboard | Dashboard | View expense summaries and charts |
-| /expenses | Expense List | View, search, and filter expenses |
-| /expenses/new | Add Expense | Create a new expense |
-| /expenses/:id/edit | Edit Expense | Update an existing expense |
+| / | Expenses | View, add, search, filter, edit, and delete expenses |
+| /summary | Monthly Summary | View monthly totals and category breakdown |
 
-### Dashboard Features
+### Expenses Page Features
 
-- Current month's total expenses.
-- Number of expenses this month.
-- Category-wise spending.
-- Monthly spending chart for the last six months.
-- Recent expenses.
-
-### Expense List Features
-
-- Search expenses by title.
-- Filter expenses by category.
-- Filter expenses by date.
-- View expense details.
+- Add new expenses.
+- View expenses.
 - Edit expenses.
 - Delete expenses.
-- Add new expenses.
+- Search by title and notes.
+- Filter by category.
+- Filter by month.
+- Sort expenses.
+- Display expense count and total.
+
+### Monthly Summary Features
+
+- Month picker.
+- Monthly expense total.
+- Category-wise spending.
+- Category percentages.
+- Category spending bars.
+- Biggest single expense.
+- Empty month message.
+- Loading and error states.
 
 ### UI States
 
@@ -147,81 +146,62 @@ Features:
 
 ### Day 1 – Backend Skeleton
 
-- Create expense-api repository.
-- Initialize npm project.
-- Install Express, Mongoose, and dotenv.
-- Configure server.js.
-- Add logger middleware.
-- Add GET /health.
-- Add 404 and error handlers.
-- Create User and Expense models.
-- Implement POST /expenses with validation.
-- Install Vitest and Supertest.
-- Write GET /health test.
-- Write invalid POST /expenses test.
-- Create README.
-- Initialize Git and push to GitHub.
+- [x] Create expense-api repository.
+- [x] Initialize npm project.
+- [x] Install Express, Mongoose, and dotenv.
+- [x] Configure server.js.
+- [x] Add logger middleware.
+- [x] Add GET /health.
+- [x] Add error handling.
+- [x] Create User and Expense models.
+- [x] Implement expense validation.
+- [x] Install Vitest and Supertest.
+- [x] Write health and validation tests.
+- [x] Create README.
+- [x] Initialize Git and push to GitHub.
 
 ### Day 2 – Full CRUD
 
-- Implement GET all expenses.
-- Implement GET expense by ID.
-- Implement POST expense.
-- Implement PATCH expense.
-- Implement DELETE expense.
-- Add input validation.
-- Write API tests for all CRUD operations.
-- Test invalid IDs and missing data.
+- [x] Implement GET all expenses.
+- [x] Implement GET expense by ID.
+- [x] Implement POST expense.
+- [x] Implement PATCH expense.
+- [x] Implement DELETE expense.
+- [x] Add input validation.
+- [x] Write API tests for CRUD operations.
+- [x] Test invalid IDs and missing data.
 
 ### Day 3 – Authentication and Ownership
 
-- Implement user registration.
-- Hash passwords using bcrypt.
-- Implement user login.
-- Generate JWT tokens.
-- Create requireAuth middleware.
-- Add owner reference to expenses.
-- Implement ownerFilter.
-- Protect all expense routes.
-- Test authentication.
-- Test two-user data isolation.
+- [x] Implement user registration.
+- [x] Hash passwords using bcrypt.
+- [x] Implement user login.
+- [x] Generate JWT tokens.
+- [x] Create requireAuth middleware.
+- [x] Add owner reference to expenses.
+- [x] Protect expense routes.
+- [x] Test authentication.
+- [x] Test user data isolation.
 
 ### Day 4 – React Frontend
 
-- Create expense-react repository.
-- Set up React and React Router.
-- Create Login and Register pages.
-- Create Dashboard page.
-- Create Expense List page.
-- Create Add Expense form.
-- Create Edit Expense form.
-- Implement Delete functionality.
-- Connect frontend to backend API.
-- Add loading and error states.
+- [x] Create expense-react repository.
+- [x] Set up React and React Router.
+- [x] Create Login and Register pages.
+- [x] Create Expenses page.
+- [x] Create expense form.
+- [x] Implement Edit functionality.
+- [x] Implement Delete functionality.
+- [x] Connect frontend to backend API.
+- [x] Add loading and error states.
+- [x] Implement protected routes.
 
-### Day 5 – Search, Calculations and Deployment
+### Day 5 – Search, Summary and Deployment
 
-- Implement title search.
-- Implement category filtering.
-- Implement date filtering.
-- Calculate monthly expense totals.
-- Display the last six months in a chart.
-- Test the complete application.
-- Deploy backend.
-- Deploy frontend.
-- Configure production API URL.
-- Update README with deployment links.
-
-## 6. First Task Tomorrow Morning
-
-Create the expense-api project, initialize npm, install the required dependencies, and configure the backend folder structure.
-
-## 7. Technologies
-
-- Frontend: React, HTML, CSS, JavaScript
-- Backend: Node.js, Express.js
-- Database: MongoDB and Mongoose
-- Authentication: JWT and bcrypt
-- Testing: Vitest and Supertest
-- Deployment: Render and Vercel
-- Version Control: Git and GitHub
+- [x] Implement title search.
+- [x] Implement notes search.
+- [x] Implement category filtering.
+- [x] Implement month filtering.
+- [x] Implement expense sorting.
+- [x] Calculate monthly expense totals.
+- [x] Create
