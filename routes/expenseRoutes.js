@@ -95,13 +95,29 @@ router.get("/summary", async (req, res) => {
       },
     });
 
+    // Calculate monthly total and category totals
     const total = monthTotal(expenses, month);
     const byCategory = totalsByCategory(expenses);
+
+    // Find the biggest single expense
+    const biggestExpense = expenses.reduce((biggest, expense) => {
+      if (!biggest || Number(expense.amount) > Number(biggest.amount)) {
+        return expense;
+      }
+
+      return biggest;
+    }, null);
 
     return res.status(200).json({
       month,
       total,
       byCategory,
+      biggestExpense: biggestExpense
+        ? {
+            title: biggestExpense.title,
+            amount: biggestExpense.amount,
+          }
+        : null,
     });
   } catch (err) {
     const status = statusForDbError(err);
