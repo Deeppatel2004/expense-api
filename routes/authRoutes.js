@@ -1,4 +1,3 @@
-
 const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -15,10 +14,7 @@ function normalizeEmail(email) {
 
 // 2. Validate registration
 function validateRegister(body) {
-  if (
-    typeof body.name !== "string" ||
-    body.name.trim() === ""
-  ) {
+  if (typeof body.name !== "string" || body.name.trim() === "") {
     return { ok: false, error: "Name is required" };
   }
 
@@ -28,21 +24,14 @@ function validateRegister(body) {
 
   const parts = body.email.trim().split("@");
 
-  if (
-    parts.length !== 2 ||
-    parts[0] === "" ||
-    parts[1] === ""
-  ) {
+  if (parts.length !== 2 || parts[0] === "" || parts[1] === "") {
     return { ok: false, error: "Invalid email" };
   }
 
-  if (
-    typeof body.password !== "string" ||
-    body.password.length < 8
-  ) {
+  if (typeof body.password !== "string" || body.password.length < 8) {
     return {
       ok: false,
-      error: "Password must be at least 8 characters"
+      error: "Password must be at least 8 characters",
     };
   }
 
@@ -54,7 +43,7 @@ function meResponse(user) {
   return {
     id: user._id.toString(),
     name: user.name,
-    email: user.email
+    email: user.email,
   };
 }
 
@@ -66,7 +55,7 @@ router.post("/register", async (req, res) => {
 
     if (!validation.ok) {
       return res.status(400).json({
-        error: validation.error
+        error: validation.error,
       });
     }
 
@@ -77,34 +66,30 @@ router.post("/register", async (req, res) => {
 
     if (existingUser) {
       return res.status(409).json({
-        error: "Email already registered"
+        error: "Email already registered",
       });
     }
 
-    const hashedPassword = await bcrypt.hash(
-      body.password,
-      10
-    );
+    const hashedPassword = await bcrypt.hash(body.password, 10);
 
     const user = await User.create({
       name,
       email,
-      password: hashedPassword
+      password: hashedPassword,
     });
 
     return res.status(201).json(meResponse(user));
-
   } catch (error) {
     if (error.code === 11000) {
       return res.status(409).json({
-        error: "Email already registered"
+        error: "Email already registered",
       });
     }
 
     console.error(error);
 
     return res.status(500).json({
-      error: "Server error"
+      error: "Server error",
     });
   }
 });
@@ -115,9 +100,7 @@ router.post("/login", async (req, res) => {
     const body = req.body || {};
 
     const email =
-      typeof body.email === "string"
-        ? normalizeEmail(body.email)
-        : "";
+      typeof body.email === "string" ? normalizeEmail(body.email) : "";
 
     const password = body.password;
 
@@ -129,31 +112,30 @@ router.post("/login", async (req, res) => {
       !(await bcrypt.compare(password, user.password))
     ) {
       return res.status(401).json({
-        error: "Invalid email or password"
+        error: "Invalid email or password",
       });
     }
 
     const token = jwt.sign(
       {
         sub: user._id.toString(),
-        email: user.email
+        email: user.email,
       },
       process.env.JWT_SECRET,
       {
-        expiresIn: "7d"
-      }
+        expiresIn: "7d",
+      },
     );
 
     return res.status(200).json({
       token,
-      user: meResponse(user)
+      user: meResponse(user),
     });
-
   } catch (error) {
     console.error(error);
 
     return res.status(500).json({
-      error: "Server error"
+      error: "Server error",
     });
   }
 });
@@ -161,22 +143,20 @@ router.post("/login", async (req, res) => {
 // 6. GET /auth/me
 router.get("/me", requireAuth, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id)
-      .select("_id name email");
+    const user = await User.findById(req.user.id).select("_id name email");
 
     if (!user) {
       return res.status(401).json({
-        error: "User no longer exists"
+        error: "User no longer exists",
       });
     }
 
     return res.status(200).json(meResponse(user));
-
   } catch (error) {
     console.error(error);
 
     return res.status(500).json({
-      error: "Server error"
+      error: "Server error",
     });
   }
 });

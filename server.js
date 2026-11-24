@@ -1,4 +1,3 @@
-
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
@@ -19,7 +18,7 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: allowedOrigins,
-  })
+  }),
 );
 
 // Middleware
@@ -56,7 +55,7 @@ app.use((req, res, next) => {
 });
 
 // Error handler
-app.use((err, req, res, next) => {
+app.use((err, req, res, _next) => {
   const status = err.status || 500;
 
   res.status(status).json({
@@ -67,15 +66,9 @@ app.use((err, req, res, next) => {
 
 // Start server only when executed directly
 if (require.main === module) {
-  console.log(
-    "MONGODB_URI exists:",
-    Boolean(process.env.MONGODB_URI)
-  );
+  console.log("MONGODB_URI exists:", Boolean(process.env.MONGODB_URI));
 
-  console.log(
-    "JWT_SECRET exists:",
-    Boolean(process.env.JWT_SECRET)
-  );
+  console.log("JWT_SECRET exists:", Boolean(process.env.JWT_SECRET));
 
   if (!process.env.MONGODB_URI) {
     console.error("ERROR: MONGODB_URI is missing");
@@ -87,10 +80,10 @@ if (require.main === module) {
     process.exit(1);
   }
 
-mongoose
-  .connect(process.env.MONGODB_URI, {
-    serverSelectionTimeoutMS: 10000,
-  })
+  mongoose
+    .connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 10000,
+    })
     .then(() => {
       console.log("MongoDB connected");
 

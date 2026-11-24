@@ -1,4 +1,3 @@
-
 const { CATEGORIES } = require("./models/Expense");
 
 // 1. Validate new expense
@@ -31,10 +30,7 @@ function validateExpense(data) {
     return "Valid date is required";
   }
 
-  if (
-    data.notes !== undefined &&
-    typeof data.notes !== "string"
-  ) {
+  if (data.notes !== undefined && typeof data.notes !== "string") {
     return "Notes must be a string";
   }
 
@@ -54,7 +50,6 @@ function toPublicExpense(expense) {
     updatedAt: expense.updatedAt,
   };
 }
-
 
 // 3. Filter expenses by owner, search, category, month and date range
 function expenseFilter(userId, query = {}) {
@@ -104,14 +99,12 @@ function expenseFilter(userId, query = {}) {
   return filter;
 }
 
-
 // 4. Calculate totals by category
 function totalsByCategory(expenses) {
   const totals = {};
 
   for (const expense of expenses) {
-    totals[expense.category] =
-      (totals[expense.category] || 0) + expense.amount;
+    totals[expense.category] = (totals[expense.category] || 0) + expense.amount;
   }
 
   return Object.entries(totals)
@@ -145,7 +138,6 @@ function monthlyTotals(expenses) {
   return totals;
 }
 
-
 function monthTotal(expenses, month) {
   let total = 0;
 
@@ -166,14 +158,10 @@ function monthTotal(expenses, month) {
   return Number(total.toFixed(2));
 }
 
-
 // 6. Check MongoDB ObjectId
 // Reused from todo-api
 function isValidId(id) {
-  return (
-    typeof id === "string" &&
-    /^[a-fA-F0-9]{24}$/.test(id)
-  );
+  return typeof id === "string" && /^[a-fA-F0-9]{24}$/.test(id);
 }
 
 // 7. Prepare allowed PATCH changes
@@ -185,13 +173,7 @@ function cleanPatch(body) {
     return changes;
   }
 
-  const allowedFields = [
-    "title",
-    "amount",
-    "category",
-    "date",
-    "notes",
-  ];
+  const allowedFields = ["title", "amount", "category", "date", "notes"];
 
   for (const field of allowedFields) {
     if (body[field] !== undefined) {

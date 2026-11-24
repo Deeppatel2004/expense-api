@@ -1,12 +1,4 @@
-
-import {
-  describe,
-  it,
-  expect,
-  beforeAll,
-  afterAll,
-  beforeEach,
-} from "vitest";
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
 import request from "supertest";
 import jwt from "jsonwebtoken";
 
@@ -45,7 +37,7 @@ beforeAll(async () => {
       email: user.email,
     },
     process.env.JWT_SECRET,
-    { expiresIn: "1h" }
+    { expiresIn: "1h" },
   );
 
   // User B
@@ -63,7 +55,7 @@ beforeAll(async () => {
       email: userB.email,
     },
     process.env.JWT_SECRET,
-    { expiresIn: "1h" }
+    { expiresIn: "1h" },
   );
 });
 
@@ -90,9 +82,9 @@ describe("Expense API", () => {
   // 1. CREATE
   describe("POST /expenses", () => {
     it("creates an expense with status 201 and hides owner", async () => {
-      const response = await auth(
-        request(app).post("/expenses")
-      ).send(validExpense);
+      const response = await auth(request(app).post("/expenses")).send(
+        validExpense,
+      );
 
       expect(response.status).toBe(201);
       expect(response.body.success).toBe(true);
@@ -102,9 +94,7 @@ describe("Expense API", () => {
     });
 
     it("refuses an empty title with status 400", async () => {
-      const response = await auth(
-        request(app).post("/expenses")
-      ).send({
+      const response = await auth(request(app).post("/expenses")).send({
         ...validExpense,
         title: "",
       });
@@ -114,23 +104,17 @@ describe("Expense API", () => {
     });
 
     it("refuses amount zero with status 400", async () => {
-      const response = await auth(
-        request(app).post("/expenses")
-      ).send({
+      const response = await auth(request(app).post("/expenses")).send({
         ...validExpense,
         amount: 0,
       });
 
       expect(response.status).toBe(400);
-      expect(response.body.error.message).toBe(
-        "Amount must be at least 0.01"
-      );
+      expect(response.body.error.message).toBe("Amount must be at least 0.01");
     });
 
     it("refuses a bad category with status 400", async () => {
-      const response = await auth(
-        request(app).post("/expenses")
-      ).send({
+      const response = await auth(request(app).post("/expenses")).send({
         ...validExpense,
         category: "Travel",
       });
@@ -143,13 +127,9 @@ describe("Expense API", () => {
   // 2. READ ALL
   describe("GET /expenses", () => {
     it("lists expenses with status 200 and an array", async () => {
-      await auth(
-        request(app).post("/expenses")
-      ).send(validExpense);
+      await auth(request(app).post("/expenses")).send(validExpense);
 
-      const response = await auth(
-        request(app).get("/expenses")
-      );
+      const response = await auth(request(app).get("/expenses"));
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
@@ -161,15 +141,13 @@ describe("Expense API", () => {
   // 3. READ ONE
   describe("GET /expenses/:id", () => {
     it("gets one expense with status 200", async () => {
-      const created = await auth(
-        request(app).post("/expenses")
-      ).send(validExpense);
+      const created = await auth(request(app).post("/expenses")).send(
+        validExpense,
+      );
 
       const id = created.body.expense.id;
 
-      const response = await auth(
-        request(app).get(`/expenses/${id}`)
-      );
+      const response = await auth(request(app).get(`/expenses/${id}`));
 
       expect(response.status).toBe(200);
       expect(response.body.expense.id).toBe(id);
@@ -178,7 +156,7 @@ describe("Expense API", () => {
 
     it("returns 404 for a made-up ID", async () => {
       const response = await auth(
-        request(app).get("/expenses/507f1f77bcf86cd799439011")
+        request(app).get("/expenses/507f1f77bcf86cd799439011"),
       );
 
       expect(response.status).toBe(404);
@@ -188,15 +166,13 @@ describe("Expense API", () => {
   // 4. UPDATE
   describe("PATCH /expenses/:id", () => {
     it("updates an expense and really changes its value", async () => {
-      const created = await auth(
-        request(app).post("/expenses")
-      ).send(validExpense);
+      const created = await auth(request(app).post("/expenses")).send(
+        validExpense,
+      );
 
       const id = created.body.expense.id;
 
-      const response = await auth(
-        request(app).patch(`/expenses/${id}`)
-      ).send({
+      const response = await auth(request(app).patch(`/expenses/${id}`)).send({
         title: "Dinner",
         amount: 250,
       });
@@ -210,21 +186,17 @@ describe("Expense API", () => {
   // 5. DELETE
   describe("DELETE /expenses/:id", () => {
     it("deletes an expense and then GET returns 404", async () => {
-      const created = await auth(
-        request(app).post("/expenses")
-      ).send(validExpense);
+      const created = await auth(request(app).post("/expenses")).send(
+        validExpense,
+      );
 
       const id = created.body.expense.id;
 
-      const deleteResponse = await auth(
-        request(app).delete(`/expenses/${id}`)
-      );
+      const deleteResponse = await auth(request(app).delete(`/expenses/${id}`));
 
       expect(deleteResponse.status).toBe(204);
 
-      const getResponse = await auth(
-        request(app).get(`/expenses/${id}`)
-      );
+      const getResponse = await auth(request(app).get(`/expenses/${id}`));
 
       expect(getResponse.status).toBe(404);
     });
@@ -233,9 +205,9 @@ describe("Expense API", () => {
   // 6. OWNERSHIP PROTECTION
   describe("Expense ownership", () => {
     it("does not allow User B to read User A's expense", async () => {
-      const created = await auth(
-        request(app).post("/expenses")
-      ).send(validExpense);
+      const created = await auth(request(app).post("/expenses")).send(
+        validExpense,
+      );
 
       const id = created.body.expense.id;
 
@@ -247,9 +219,9 @@ describe("Expense API", () => {
     });
 
     it("does not allow User B to update User A's expense", async () => {
-      const created = await auth(
-        request(app).post("/expenses")
-      ).send(validExpense);
+      const created = await auth(request(app).post("/expenses")).send(
+        validExpense,
+      );
 
       const id = created.body.expense.id;
 
@@ -263,17 +235,15 @@ describe("Expense API", () => {
       expect(response.status).toBe(404);
 
       // Confirm User A's expense is unchanged
-      const original = await auth(
-        request(app).get(`/expenses/${id}`)
-      );
+      const original = await auth(request(app).get(`/expenses/${id}`));
 
       expect(original.body.expense.title).toBe("Lunch");
     });
 
     it("does not allow User B to delete User A's expense", async () => {
-      const created = await auth(
-        request(app).post("/expenses")
-      ).send(validExpense);
+      const created = await auth(request(app).post("/expenses")).send(
+        validExpense,
+      );
 
       const id = created.body.expense.id;
 
@@ -284,9 +254,7 @@ describe("Expense API", () => {
       expect(response.status).toBe(404);
 
       // Confirm User A's expense still exists
-      const original = await auth(
-        request(app).get(`/expenses/${id}`)
-      );
+      const original = await auth(request(app).get(`/expenses/${id}`));
 
       expect(original.status).toBe(200);
     });

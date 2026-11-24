@@ -1,8 +1,4 @@
-
-const {
-  connectTestDB,
-  disconnectTestDB,
-} = require("./db");
+const { connectTestDB, disconnectTestDB } = require("./db");
 
 beforeAll(async () => {
   await connectTestDB();

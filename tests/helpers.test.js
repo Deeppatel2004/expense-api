@@ -28,73 +28,93 @@ describe("validateExpense", () => {
   });
 
   it("rejects missing title", () => {
-    expect(validateExpense({
-      ...validExpense,
-      title: undefined,
-    })).toBe("Title is required");
+    expect(
+      validateExpense({
+        ...validExpense,
+        title: undefined,
+      }),
+    ).toBe("Title is required");
   });
 
   it("rejects empty title", () => {
-    expect(validateExpense({
-      ...validExpense,
-      title: "   ",
-    })).toBe("Title is required");
+    expect(
+      validateExpense({
+        ...validExpense,
+        title: "   ",
+      }),
+    ).toBe("Title is required");
   });
 
   it("rejects missing amount", () => {
-    expect(validateExpense({
-      ...validExpense,
-      amount: undefined,
-    })).toBe("Amount must be at least 0.01");
+    expect(
+      validateExpense({
+        ...validExpense,
+        amount: undefined,
+      }),
+    ).toBe("Amount must be at least 0.01");
   });
 
   it("rejects amount zero", () => {
-    expect(validateExpense({
-      ...validExpense,
-      amount: 0,
-    })).toBe("Amount must be at least 0.01");
+    expect(
+      validateExpense({
+        ...validExpense,
+        amount: 0,
+      }),
+    ).toBe("Amount must be at least 0.01");
   });
 
   it("rejects negative amount", () => {
-    expect(validateExpense({
-      ...validExpense,
-      amount: -50,
-    })).toBe("Amount must be at least 0.01");
+    expect(
+      validateExpense({
+        ...validExpense,
+        amount: -50,
+      }),
+    ).toBe("Amount must be at least 0.01");
   });
 
   it("rejects non-numeric amount", () => {
-    expect(validateExpense({
-      ...validExpense,
-      amount: "abc",
-    })).toBe("Amount must be at least 0.01");
+    expect(
+      validateExpense({
+        ...validExpense,
+        amount: "abc",
+      }),
+    ).toBe("Amount must be at least 0.01");
   });
 
   it("rejects invalid category", () => {
-    expect(validateExpense({
-      ...validExpense,
-      category: "Travel",
-    })).toBe("Invalid category");
+    expect(
+      validateExpense({
+        ...validExpense,
+        category: "Travel",
+      }),
+    ).toBe("Invalid category");
   });
 
   it("rejects invalid date", () => {
-    expect(validateExpense({
-      ...validExpense,
-      date: "not-a-date",
-    })).toBe("Valid date is required");
+    expect(
+      validateExpense({
+        ...validExpense,
+        date: "not-a-date",
+      }),
+    ).toBe("Valid date is required");
   });
 
   it("rejects missing date", () => {
-    expect(validateExpense({
-      ...validExpense,
-      date: undefined,
-    })).toBe("Valid date is required");
+    expect(
+      validateExpense({
+        ...validExpense,
+        date: undefined,
+      }),
+    ).toBe("Valid date is required");
   });
 
   it("rejects non-string notes", () => {
-    expect(validateExpense({
-      ...validExpense,
-      notes: 123,
-    })).toBe("Notes must be a string");
+    expect(
+      validateExpense({
+        ...validExpense,
+        notes: 123,
+      }),
+    ).toBe("Notes must be a string");
   });
 });
 
@@ -128,9 +148,11 @@ describe("expenseFilter", () => {
   });
 
   it("filters by category", () => {
-    expect(expenseFilter("user123", {
-      category: "Food",
-    })).toEqual({
+    expect(
+      expenseFilter("user123", {
+        category: "Food",
+      }),
+    ).toEqual({
       owner: "user123",
       category: "Food",
     });
@@ -147,9 +169,11 @@ describe("expenseFilter", () => {
   });
 
   it("ignores an invalid month", () => {
-    expect(expenseFilter("user123", {
-      month: "2026-15",
-    })).toEqual({
+    expect(
+      expenseFilter("user123", {
+        month: "2026-15",
+      }),
+    ).toEqual({
       owner: "user123",
     });
   });
@@ -174,12 +198,12 @@ describe("totalsByCategory", () => {
   });
 
   it("rounds totals to two decimal places", () => {
-    expect(totalsByCategory([
-      { category: "Food", amount: 1.111 },
-      { category: "Food", amount: 2.222 },
-    ])).toEqual([
-      { category: "Food", total: 3.33 },
-    ]);
+    expect(
+      totalsByCategory([
+        { category: "Food", amount: 1.111 },
+        { category: "Food", amount: 2.222 },
+      ]),
+    ).toEqual([{ category: "Food", total: 3.33 }]);
   });
 });
 
@@ -202,8 +226,6 @@ describe("monthlyTotals", () => {
   });
 
   it("ignores invalid dates", () => {
-    expect(monthlyTotals([
-      { date: "invalid-date", amount: 50 },
-    ])).toEqual({});
+    expect(monthlyTotals([{ date: "invalid-date", amount: 50 }])).toEqual({});
   });
 });
