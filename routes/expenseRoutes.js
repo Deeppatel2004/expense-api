@@ -1,4 +1,3 @@
-
 const express = require("express");
 const router = express.Router();
 
@@ -40,9 +39,14 @@ router.post("/", async (req, res) => {
     });
   } catch (err) {
     const status = statusForDbError(err);
-    return res.status(status).json(
-      errorBody(status, status === 500 ? "Internal server error" : err.message)
-    );
+    return res
+      .status(status)
+      .json(
+        errorBody(
+          status,
+          status === 500 ? "Internal server error" : err.message,
+        ),
+      );
   }
 });
 
@@ -59,9 +63,9 @@ router.get("/", async (req, res) => {
     });
   } catch (err) {
     const status = statusForDbError(err);
-    return res.status(status).json(
-      errorBody(status, "Unable to fetch expenses")
-    );
+    return res
+      .status(status)
+      .json(errorBody(status, "Unable to fetch expenses"));
   }
 });
 
@@ -71,13 +75,10 @@ router.get("/summary", async (req, res) => {
   try {
     const { month } = req.query;
 
-    if (
-      typeof month !== "string" ||
-      !/^\d{4}-(0[1-9]|1[0-2])$/.test(month)
-    ) {
-      return res.status(400).json(
-        errorBody(400, "Invalid month format. Use YYYY-MM")
-      );
+    if (typeof month !== "string" || !/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) {
+      return res
+        .status(400)
+        .json(errorBody(400, "Invalid month format. Use YYYY-MM"));
     }
 
     // Convert YYYY-MM into a date range
@@ -121,9 +122,9 @@ router.get("/summary", async (req, res) => {
     });
   } catch (err) {
     const status = statusForDbError(err);
-    return res.status(status).json(
-      errorBody(status, "Unable to fetch summary")
-    );
+    return res
+      .status(status)
+      .json(errorBody(status, "Unable to fetch summary"));
   }
 });
 
@@ -151,9 +152,9 @@ router.get("/:id", async (req, res) => {
     });
   } catch (err) {
     const status = statusForDbError(err);
-    return res.status(status).json(
-      errorBody(status, "Unable to fetch expense")
-    );
+    return res
+      .status(status)
+      .json(errorBody(status, "Unable to fetch expense"));
   }
 });
 
@@ -169,9 +170,7 @@ router.patch("/:id", async (req, res) => {
     const changes = cleanPatch(req.body);
 
     if (Object.keys(changes).length === 0) {
-      return res.status(400).json(
-        errorBody(400, "No valid changes provided")
-      );
+      return res.status(400).json(errorBody(400, "No valid changes provided"));
     }
 
     // Find only this user's expense
@@ -215,7 +214,7 @@ router.patch("/:id", async (req, res) => {
       {
         returnDocument: "after",
         runValidators: true,
-      }
+      },
     );
 
     if (!updatedExpense) {
@@ -228,9 +227,14 @@ router.patch("/:id", async (req, res) => {
     });
   } catch (err) {
     const status = statusForDbError(err);
-    return res.status(status).json(
-      errorBody(status, status === 500 ? "Internal server error" : err.message)
-    );
+    return res
+      .status(status)
+      .json(
+        errorBody(
+          status,
+          status === 500 ? "Internal server error" : err.message,
+        ),
+      );
   }
 });
 
@@ -255,9 +259,9 @@ router.delete("/:id", async (req, res) => {
     return res.status(204).send();
   } catch (err) {
     const status = statusForDbError(err);
-    return res.status(status).json(
-      errorBody(status, "Unable to delete expense")
-    );
+    return res
+      .status(status)
+      .json(errorBody(status, "Unable to delete expense"));
   }
 });
 

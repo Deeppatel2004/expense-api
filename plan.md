@@ -12,15 +12,16 @@ We use MongoDB with two collections: User and Expense.
 
 ### User Model
 
-| Field | Type | Required |
-|---|---|---|
-| name | String | Yes |
-| email | String | Yes |
-| password | String | Yes |
-| createdAt | Date | Automatic |
-| updatedAt | Date | Automatic |
+| Field     | Type   | Required  |
+| --------- | ------ | --------- |
+| name      | String | Yes       |
+| email     | String | Yes       |
+| password  | String | Yes       |
+| createdAt | Date   | Automatic |
+| updatedAt | Date   | Automatic |
 
 Rules:
+
 - Email must be unique, lowercase, and trimmed.
 - Password must be hashed using bcrypt.
 - Password hash must never be returned in API responses.
@@ -28,18 +29,19 @@ Rules:
 
 ### Expense Model
 
-| Field | Type | Required |
-|---|---|---|
-| title | String | Yes |
-| amount | Number | Yes |
-| category | String | Yes |
-| date | Date | Yes |
-| notes | String | No |
-| owner | ObjectId (User reference) | Yes |
-| createdAt | Date | Automatic |
-| updatedAt | Date | Automatic |
+| Field     | Type                      | Required  |
+| --------- | ------------------------- | --------- |
+| title     | String                    | Yes       |
+| amount    | Number                    | Yes       |
+| category  | String                    | Yes       |
+| date      | Date                      | Yes       |
+| notes     | String                    | No        |
+| owner     | ObjectId (User reference) | Yes       |
+| createdAt | Date                      | Automatic |
+| updatedAt | Date                      | Automatic |
 
 Rules:
+
 - Amount must be a valid positive number.
 - Title must not be empty.
 - Category must match an allowed category.
@@ -65,23 +67,23 @@ One user can have many expenses, but each expense belongs to only one user.
 
 ### Authentication Routes
 
-| Method | Path | Purpose | Authentication |
-|---|---|---|---|
-| POST | /auth/register | Register a new user | No |
-| POST | /auth/login | Login and receive JWT | No |
+| Method | Path           | Purpose               | Authentication |
+| ------ | -------------- | --------------------- | -------------- |
+| POST   | /auth/register | Register a new user   | No             |
+| POST   | /auth/login    | Login and receive JWT | No             |
 
 Logout is handled on the frontend by clearing the stored authentication token.
 
 ### Expense Routes
 
-| Method | Path | Purpose | Authentication |
-|---|---|---|---|
-| POST | /expenses | Create an expense | Yes |
-| GET | /expenses | Get expenses | Yes |
-| GET | /expenses/:id | Get one expense | Yes |
-| PATCH | /expenses/:id | Update an expense | Yes |
-| DELETE | /expenses/:id | Delete an expense | Yes |
-| GET | /expenses/summary?month=YYYY-MM | Get monthly summary | Yes |
+| Method | Path                            | Purpose             | Authentication |
+| ------ | ------------------------------- | ------------------- | -------------- |
+| POST   | /expenses                       | Create an expense   | Yes            |
+| GET    | /expenses                       | Get expenses        | Yes            |
+| GET    | /expenses/:id                   | Get one expense     | Yes            |
+| PATCH  | /expenses/:id                   | Update an expense   | Yes            |
+| DELETE | /expenses/:id                   | Delete an expense   | Yes            |
+| GET    | /expenses/summary?month=YYYY-MM | Get monthly summary | Yes            |
 
 ### Search and Filtering
 
@@ -105,12 +107,12 @@ Search currently runs in the browser using the loaded expense list.
 
 ## 4. Frontend Pages
 
-| URL | Page | Functionality |
-|---|---|---|
-| /register | Register | Create a new account |
-| /login | Login | Login to an account |
-| / | Expenses | View, add, search, filter, edit, and delete expenses |
-| /summary | Monthly Summary | View monthly totals and category breakdown |
+| URL       | Page            | Functionality                                        |
+| --------- | --------------- | ---------------------------------------------------- |
+| /register | Register        | Create a new account                                 |
+| /login    | Login           | Login to an account                                  |
+| /         | Expenses        | View, add, search, filter, edit, and delete expenses |
+| /summary  | Monthly Summary | View monthly totals and category breakdown           |
 
 ### Expenses Page Features
 
