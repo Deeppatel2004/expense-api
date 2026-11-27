@@ -19,6 +19,13 @@ const {
 // Protect all expense routes
 router.use(requireAuth);
 
+// GET /expenses/categories - Get available categories
+router.get("/categories", (req, res) => {
+  return res.status(200).json({
+    categories: Expense.CATEGORIES,
+  });
+});
+
 // POST /expenses - Create expense
 router.post("/", async (req, res) => {
   try {
