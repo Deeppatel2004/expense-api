@@ -213,6 +213,35 @@ function statusForDbError(err) {
   return 500;
 }
 
+// 10. Calculate budget percentage used
+function percentUsed(spent, limit) {
+  if (!Number.isFinite(limit) || limit <= 0) return 0;
+  if (!Number.isFinite(spent)) spent = 0;
+
+  return Math.round((spent / limit) * 100);
+}
+
+// 11. Determine budget status
+function budgetStatus(spent, limit) {
+  if (!Number.isFinite(limit) || limit <= 0) return "none";
+  if (!Number.isFinite(spent)) spent = 0;
+
+  const ratio = spent / limit;
+
+  if (ratio >= 1) return "over";
+  if (ratio >= 0.75) return "warning";
+
+  return "ok";
+}
+
+// 12. Calculate remaining budget
+function remaining(spent, limit) {
+  if (!Number.isFinite(limit)) return 0;
+  if (!Number.isFinite(spent)) spent = 0;
+
+  return Number((limit - spent).toFixed(2));
+}
+
 // Export all functions
 module.exports = {
   validateExpense,
@@ -225,4 +254,7 @@ module.exports = {
   cleanPatch,
   errorBody,
   statusForDbError,
+  percentUsed,
+  budgetStatus,
+  remaining,
 };

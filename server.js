@@ -47,6 +47,10 @@ app.get("/health", (req, res) => {
 const expenseRoutes = require("./routes/expenseRoutes");
 app.use("/expenses", expenseRoutes);
 
+// Budget routes
+const budgetRoutes = require("./routes/budgetRoutes");
+app.use("/budgets", budgetRoutes);
+
 // 404 handler
 app.use((req, res, next) => {
   const error = new Error("Route not found");
